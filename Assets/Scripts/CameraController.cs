@@ -9,6 +9,9 @@ public class CameraController : MonoBehaviour
 	public GameObject cameraObject;
 	public GameObject cameraRig;
 
+	public GameObject sprite;
+	public GameObject reticle;
+
 	// NIGHT NOTES:
 	// Smooth rotation method:
 	// If axis is true, set target to nearest increment greater/less than current (not current + increment, since that changes each frame).
@@ -62,19 +65,20 @@ public class CameraController : MonoBehaviour
 	float zoomMax = 16f;
 	float camZoom = 6.25f;
 
-	float lerpRate = 0.125f;		// How fast the camera is lerped between values
+	float lerpRate = 0.25f;		// How fast the camera is lerped between values
 
-	// Use this for initialization
+	// Use for initialization
 	void Start ()
 	{
 		//cameraObject = Camera.main.gameObject;
 		//cameraRig = this.gameObject;
 
-		cameraRig.transform.localPosition = new Vector3 (0f, elevation, 0f);
+		cameraRig.transform.localPosition = new Vector3 (0, elevation, 0);
 		cameraRig.transform.localEulerAngles = new Vector3 (Mathf.Round(incline) * inclineIncrement, Mathf.Round(rotation) * rotationIncrement, 0f);
-		cameraObject.transform.localPosition = new Vector3 (0f, 0f, -zoomIncrement * Mathf.Round(zoom));
+		cameraObject.transform.localPosition = new Vector3 (0, 0, -zoomIncrement * Mathf.Round(zoom));
 	}
 
+	// Use for Input
 	void Update()
 	{
 		//transform.position = Vector3.Lerp(transform.position, targetObject.transform.position, scrollRate);
@@ -85,26 +89,33 @@ public class CameraController : MonoBehaviour
 			firstPerson = true;
 			Cursor.visible = false;
 			Cursor.lockState = CursorLockMode.Locked;
+
+			sprite.SetActive(false);
+			reticle.SetActive(true);
 		}
 		else if (firstPerson) // Release First Person Mode
 		{
 			firstPerson = false;
 			Cursor.visible = true;
 			Cursor.lockState = CursorLockMode.None;
-			incline = Mathf.Clamp(incline, 0, 6);
+			rotation = Mathf.Round(rotation);
+			incline = Mathf.Round(incline);
+
+			sprite.SetActive(true);
+			reticle.SetActive(false);
 		}
 
 		if (firstPerson)
 		{
-        	rotation = rotation + (Input.GetAxis("Mouse X"));
-        	incline = Mathf.Clamp(incline - (Input.GetAxis("Mouse Y")), -6, 6);
+        	rotation = rotation + (Input.GetAxis("Aim X"));
+        	incline = Mathf.Clamp(incline - (Input.GetAxis("Aim Y")), -6, 6);
 		}
 		else
 		{
-			if (Input.GetAxis("Mouse 2") != 0)
+			if (Input.GetAxis("Camera") != 0)
 	        {
-	        	rotation = rotation + (Input.GetAxis("Mouse X"));
-	        	incline = Mathf.Clamp(incline - (Input.GetAxis("Mouse Y")), 0, 6);
+	        	rotation = rotation + (Input.GetAxis("Aim X"));
+	        	incline = Mathf.Clamp(incline - (Input.GetAxis("Aim Y")), -6, 6);
 	            //Debug.Log("Mouse Delta: " + mouseX + "/" + mouseY);
 
 	            //cameraRig.transform.localEulerAngles = new Vector3 (Mathf.Round(incline) * inclineIncrement, Mathf.Round(rotation) * rotationIncrement, 0f);
@@ -112,12 +123,9 @@ public class CameraController : MonoBehaviour
 	        }
 		}
 
-
-
-   		if (Input.GetAxis("Mouse Wheel") != 0)
+   		if (Input.GetAxis("Zoom") != 0)
     	{
-    		float mouseWheel = Input.GetAxis("Mouse Wheel");
-    		zoom = Mathf.Clamp(zoom - mouseWheel, 0f, zoomMax);
+    		zoom = Mathf.Clamp(zoom - Input.GetAxis("Zoom"), 0, zoomMax);
 
     		// NIGHT NOTES 11/17/2018: Fix so zoom is increment * 2 to the rounded Zoom power.
     		// Lerp camera toward zoom results, and toward rotation/incline.
@@ -131,7 +139,7 @@ public class CameraController : MonoBehaviour
     		//cameraObject.transform.localPosition = new Vector3 (0f, 0f, -zoomIncrement * Mathf.Round(zoom));
     	}
 
-        if (Input.GetKeyUp(KeyCode.Mouse2))
+        if (Input.GetButtonUp("Camera"))
         {
         	//zoom = Mathf.Round(zoom);
 			//cameraObject.transform.localPosition = new Vector3 (0f, 0f, -zoomIncrement * zoom);
@@ -185,9 +193,9 @@ public class CameraController : MonoBehaviour
 		//camIncline = Mathf.Lerp(camIncline, incline * inclineIncrement, lerpRate);
 		camIncline = Mathf.Lerp(camIncline, incline * inclineIncrement, lerpRate);
 
-		cameraObject.transform.localPosition = new Vector3 (0f, 0f, camZoom);
+		cameraObject.transform.localPosition = new Vector3 (0, 0, camZoom);
 		//cameraRig.transform.localEulerAngles = new Vector3 (camIncline, camRotation, 0f);
-		cameraRig.transform.localEulerAngles = new Vector3 (camIncline, camRotation, 0f);
+		cameraRig.transform.localEulerAngles = new Vector3 (camIncline, camRotation, 0);
 
 		//Quaternion camRotation = Quaternion.Lerp(cameraRig.transform.rotation, Quaternion.Euler(incline * inclineIncrement, rotation * rotationIncrement, 0), lerpRate);
 
